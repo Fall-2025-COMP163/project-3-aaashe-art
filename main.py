@@ -2,7 +2,7 @@
 COMP 163 - Project 3: Quest Chronicles
 Main Game Module - Starter Code
 
-Name: [Your Name Here]
+Name: Abraheem Ashe
 
 AI Usage: [Document any AI assistance used]
 
@@ -295,7 +295,33 @@ def view_character_stats():
     # Show: name, class, level, health, stats, gold, etc.
     # Use character_manager functions
     # Show quest progress using quest_handler
-    pass
+    stats = character_manager.get_character_stats(current_character)
+
+    print("\n=== CHARACTER STATS ===")
+    print(f"Name: {stats['name']}")
+    print(f"Class: {stats['class']}")
+    print(f"Level: {stats['level']}")
+    print(f"Max Health: {stats['max_health']}")
+    print(f"Strength: {stats['strength']}")
+    print(f"Magic: {stats['magic']}")
+    print(f"Gold: {stats['gold']}")
+
+    active_quests = quest_handler.get_active_quests(current_character)
+    completed_quests = quest_handler.get_completed_quests(current_character)
+
+    print("\nActive Quests:")
+    if active_quests:
+        for quest in active_quests:
+            print(f"- {quest.name}: {quest.description}")
+    else:
+        print("None")
+
+    print("\nCompleted Quests:")
+    if completed_quests:
+        for quest in completed_quests:
+            print(f"- {quest.name}")
+    else:
+        print("None")
 
 def view_inventory():
     """Display and manage inventory"""
@@ -305,7 +331,7 @@ def view_inventory():
     # Show current inventory
     # Options: Use item, Equip weapon/armor, Drop item
     # Handle exceptions from inventory_system
-    pass
+    
 
 def quest_menu():
     """Quest management menu"""
