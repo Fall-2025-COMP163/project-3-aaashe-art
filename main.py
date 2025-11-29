@@ -85,7 +85,50 @@ def new_game():
     # Handle InvalidCharacterClassError
     # Save character
     # Start game loop
-    pass
+    print("\n=== CREATE NEW CHARACTER ===")
+
+    name = input("Enter character name: ")
+
+    print("\nChoose a class:")
+    print("1. Warrior")
+    print("2. Mage")
+    print("3. Rogue")
+    print("4. Cleric")
+
+    class_choice = input("Select (1-4): ")
+
+    try:
+        class_num = int(class_choice)
+    except ValueError:
+        print("Please enter a valid number.")
+        return new_game(character_manager)
+
+    if class_num not in (1, 2, 3, 4):
+        print("Please enter a number between 1 and 4.")
+        return new_game(character_manager)
+
+    if class_num == 1:
+        class_name = "Warrior"
+    elif class_num == 2:
+        class_name = "Mage"
+    elif class_num == 3:
+        class_name = "Rogue"
+    elif class_num == 4:
+        class_name = "Cleric"
+
+    try:
+        character = character_manager.create_character(name, class_name)
+    except InvalidCharacterClassError:
+        print("ERROR: Invalid character class.")
+        return new_game(character_manager)
+
+    character_manager.save_character(character)
+
+    print(f"\nCharacter '{name}' the {class_name} created successfully!")
+    print("Starting your adventure...\n")
+    game_loop(character)
+
+    return character
 
 def load_game():
     """
