@@ -146,7 +146,49 @@ def load_game():
     # Try to load character with character_manager.load_character()
     # Handle CharacterNotFoundError and SaveFileCorruptedError
     # Start game loop
-    pass
+    print("\n=== LOAD EXISTING CHARACTER ===")
+
+    try:
+        saved_names = character_manager.list_saved_characters()
+    except Exception as no_save:
+        print(f"Error retrieving saved characters: {no_save}")
+        return
+
+    if not saved_names:
+        print("No saved characters found. Please start a new game first.")
+        return
+
+    print("\nSaved characters:")
+    for save_chars, name in enumerate(saved_names, 1):
+        print(f"{save_chars}. {name}")
+
+    choice = input(f"Select a character to load (1-{len(saved_names)}): ")
+
+    try:
+        selected_index = int(choice)
+    except ValueError:
+        print("Please enter a valid number.")
+        return load_game(character_manager)
+
+    if not (1 <= selected_index <= len(saved_names)):
+        print(f"Please enter a number between 1 and {len(saved_names)}.")
+        return load_game(character_manager)
+
+    selected_name = saved_names[selected_index - 1]
+
+    try:
+        character = character_manager.load_character(selected_name)
+    except CharacterNotFoundError:
+        print(f"ERROR: Character '{selected_name}' not found.")
+        return load_game(character_manager)
+    except SaveFileCorruptedError:
+        print(f"ERROR: Save file for '{selected_name}' is corrupted.")
+        return load_game(character_manager)
+
+    current_character = character
+    print(f"\nCharacter '{character.name}' loaded successfully!")
+    print("Resuming your adventure...\n")
+    game_loop()
 
 # ============================================================================
 # GAME LOOP
@@ -166,7 +208,43 @@ def game_loop():
     #   Get player choice
     #   Execute chosen action
     #   Save game after each action
-    pass
+    while game_running:
+        print("\n=== GAME MENU ===")
+        print("1. View Character Stats")
+        print("2. View Inventory")
+        print("3. Quest Menu")
+        print("4. Explore (Find Battles)")
+        print("5. Shop")
+        print("6. Save and Quit")
+
+        choice = input("Select an option (1-6): ")
+
+        try:
+            choice_num = int(choice)
+        except ValueError:
+            print("Please enter a valid number (1-6).")
+            continue
+
+        if choice_num == 1:
+            view_character_stats()
+        elif choice_num == 2:
+            view_inventory()
+        elif choice_num == 3:
+            quest_menu()
+        elif choice_num == 4:
+            explore()
+        elif choice_num == 5:
+            shop()
+        elif choice_num == 6:
+            save_game()
+            print("Game saved. Goodbye!")
+            game_running = False
+        else:
+            print("Invalid choice. Please select a number between 1 and 6.")
+            continue
+
+        if game_running:
+            save_game()
 
 def game_menu():
     """
