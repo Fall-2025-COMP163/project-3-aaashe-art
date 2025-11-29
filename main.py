@@ -261,7 +261,27 @@ def game_menu():
     Returns: Integer choice (1-6)
     """
     # TODO: Implement game menu
-    pass
+    while True:
+        print("\n=== GAME MENU ===")
+        print("1. View Character Stats")
+        print("2. View Inventory")
+        print("3. Quest Menu")
+        print("4. Explore (Find Battles)")
+        print("5. Shop")
+        print("6. Save and Quit")
+
+        choice = input("Select an option (1-6): ")
+
+        try:
+            choice_num = int(choice)
+        except ValueError:
+            print("Please enter a valid number (1-6).")
+            continue
+
+        if 1 <= choice_num <= 6:
+            return choice_num
+        else:
+            print("Invalid choice. Please select a number between 1 and 6.")
 
 # ============================================================================
 # GAME ACTIONS
