@@ -331,7 +331,78 @@ def view_inventory():
     # Show current inventory
     # Options: Use item, Equip weapon/armor, Drop item
     # Handle exceptions from inventory_system
-    
+    print("\n=== INVENTORY ===")
+
+    inventory = current_character.inventory
+
+    if not inventory:
+        print("Your inventory is empty.")
+        return
+
+    # Display all items with numbers
+    for inv_items, item_name in enumerate(inventory, 1):
+        print(f"{inv_items}. {item_name}")
+
+    choice = input(f"Select an item (1-{len(inventory)}) or 0 to exit: ")
+
+    try:
+        choice_num = int(choice)
+    except ValueError:
+        print("Please enter a valid number.")
+        return
+
+    if choice_num == 0:
+        return
+
+    if not (1 <= choice_num <= len(inventory)):
+        print("Invalid item selection.")
+        return
+
+    selected_item_name = inventory[choice_num - 1]
+    print(f"Selected Item: {selected_item_name}")
+
+    print("Item Options:")
+    print("1. Use Item")
+    print("2. Equip Item")
+    print("3. Drop Item")
+    print("4. Cancel")
+
+    action = input("Choose an action (1-4): ")
+
+    try:
+        action_num = int(action)
+    except ValueError:
+        print("Please enter a valid action number.")
+        return
+
+    if action_num == 1:
+        try:
+            inventory_system.use_item(current_character, selected_item_name)
+            print(f"You used {selected_item_name}.")
+        except InventoryError as e:
+            print(f"ERROR: {e}")
+
+    elif action_num == 2:
+        try:
+            inventory_system.equip_item(current_character, selected_item_name)
+            print(f"You equipped {selected_item_name}.")
+        except InventoryError as e:
+            print(f"ERROR: {e}")
+
+    elif action_num == 3:
+        try:
+            inventory_system.remove_item(current_character, selected_item_name)
+            print(f"You dropped {selected_item_name}.")
+        except InventoryError as e:
+            print(f"ERROR: {e}")
+
+    elif action_num == 4:
+        print("Canceled.")
+        return
+
+    else:
+        print("Invalid action.")
+
 
 def quest_menu():
     """Quest management menu"""
@@ -347,7 +418,106 @@ def quest_menu():
     #   6. Complete Quest (for testing)
     #   7. Back
     # Handle exceptions from quest_handler
-    pass
+
+    while True:
+        print("=== QUEST MENU ===")
+        print("1. View Active Quests")
+        print("2. View Available Quests")
+        print("3. View Completed Quests")
+        print("4. Accept Quest")
+        print("5. Abandon Quest")
+        print("6. Complete Quest")
+        print("7. Back")
+
+        choice = input("Choose an option: ")
+
+        if choice == "1":
+            active = quest_handler.get_active_quests(current_character)
+            print("--- Active Quests ---")
+            if not active:
+                print("No active quests.")
+            else:
+                for quest in active:
+                    print(f"{quest.name} - {quest.description}")
+
+        elif choice == "2":
+            available = quest_handler.get_available_quests(current_character, all_quests)
+            print("--- Available Quests ---")
+            if not available:
+                print("No available quests.")
+            else:
+                for quest in available:
+                    print(f"{quest.quest_id}. {quest.name} - {quest.description}")
+
+        elif choice == "3":
+            completed = quest_handler.get_completed_quests(current_character)
+            print("--- Completed Quests ---")
+            if not completed:
+                print("No completed quests.")
+            else:
+                for quest in completed:
+                    print(f"{quest.name}")
+
+        elif choice == "4":
+            available = quest_handler.get_available_quests(current_character, all_quests)
+            if not available:
+                print("No quests available to accept.")
+                continue
+
+            print("--- Accept Quest ---")
+            for quest in available:
+                print(f"{quest.quest_id}. {quest.name}")
+
+            quest_id = input("Enter quest ID to accept: ")
+
+            try:
+                quest_handler.accept_quest(current_character, quest_id, all_quests)
+                print("Quest accepted!")
+            except Exception as e:
+                print(f"Error: {e}")
+
+        elif choice == "5":
+            active = quest_handler.get_active_quests(current_character)
+            if not active:
+                print("No active quests to abandon.")
+                continue
+
+            print("\n--- Abandon Quest ---")
+            for quest in active:
+                print(f"{quest.quest_id}. {quest.name}")
+
+            quest_id = input("Enter quest ID to abandon: ")
+
+            try:
+                quest_handler.abandon_quest(current_character, quest_id)
+                print("Quest abandoned.")
+            except Exception as e:
+                print(f"Error: {e}")
+
+        elif choice == "6":
+            active = quest_handler.get_active_quests(current_character)
+            if not active:
+                print("No quest to complete.")
+                continue
+
+            print("--- Complete Quest ---")
+            for quest in active:
+                print(f"{quest.quest_id}. {quest.name}")
+
+            quest_id = input("Enter quest ID to complete: ")
+
+            try:
+                quest_handler.complete_quest(current_character, quest_id)
+                print("Quest completed!")
+            except Exception as e:
+                print(f"Error: {e}")
+
+        elif choice == "7":
+            break
+
+        else:
+            print("Invalid choice.")
+
 
 def explore():
     """Find and fight random enemies"""
@@ -358,7 +528,40 @@ def explore():
     # Start combat with combat_system.SimpleBattle
     # Handle combat results (XP, gold, death)
     # Handle exceptions
-    pass
+    print("=== EXPLORING... ===")
+
+    try:
+        enemy = game_data.generate_enemy(current_character.level)
+    except Exception as e:
+        print(f"Error generating enemy: {e}")
+        return
+
+    print(f"A wild {enemy['name']} appears!")
+
+    try:
+        battle = combat_system.SimpleBattle(current_character, enemy)
+        result = battle.start()
+    except Exception as e:
+        print(f"Combat error: {e}")
+        return
+
+    if result.get("dead"):
+        print("You have fallen in battle...")
+        print("Returning to main menu...")
+        return
+
+    xp = result.get("xp", 0)
+    gold = result.get("gold", 0)
+
+    current_character.xp += xp
+    current_character.gold += gold
+
+    print(f"Victory! You earned {xp} XP and {gold} gold.")
+
+    try:
+        character_manager.save_character(current_character)
+    except Exception as e:
+        print(f"Error saving after battle: {e}")
 
 def shop():
     """Shop menu for buying/selling items"""
