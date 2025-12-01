@@ -8,7 +8,7 @@ AI Usage: [Document any AI assistance used]
 
 This module handles character creation, loading, and saving.
 """
-SAVE_DIR = "data/save_games"
+
 import os
 from custom_exceptions import (
     InvalidCharacterClassError,
@@ -17,7 +17,7 @@ from custom_exceptions import (
     InvalidSaveDataError,
     CharacterDeadError
 )
-
+SAVE_DIR = "saves"
 # ============================================================================
 # CHARACTER MANAGEMENT FUNCTIONS
 # ============================================================================
@@ -104,24 +104,27 @@ def save_character(character, save_directory="data/save_games"):
     # Create save_directory if it doesn't exist
     # Handle any file I/O errors appropriately
     # Lists should be saved as comma-separated values
-    filename = f"{character['name']}_save.txt"
+    if not os.path.exists(SAVE_DIR):
+        os.makedirs(SAVE_DIR)
 
-    try:
-        with open(filename, "w") as f:
-            f.write(f"NAME:{character['name']}\n")
-            f.write(f"CLASS:{character['class']}\n")
-            f.write(f"LEVEL:{character['level']}\n")
-            f.write(f"HEALTH:{character['health']}\n")
-            f.write(f"STRENGTH:{character['strength']}\n")
-            f.write(f"MAGIC:{character['magic']}\n")
-            f.write(f"EXPERIENCE:{character['experience']}\n")
-            f.write(f"GOLD:{character['gold']}\n")
-            f.write(f"INVENTORY:{','.join(character['inventory'])}\n")
-            f.write(f"ACTIVE_QUESTS:{','.join(character['active_quests'])}\n")
-            f.write(f"COMPLETED_QUESTS:{','.join(character['completed_quests'])}\n")
-        return True
-    except Exception as e:
-        raise InvalidSaveDataError(f"Failed to save character: {e}")
+    filename = f"{character['name']}_save.txt"
+    filepath = os.path.join(SAVE_DIR, filename)
+
+    with open(filepath, "w") as f:
+        f.write(f"name:{character['name']}\n")
+        f.write(f"class:{character['class']}\n")
+        f.write(f"level:{character['level']}\n")
+        f.write(f"health:{character['health']}\n")
+        f.write(f"max_health:{character['max_health']}\n")
+        f.write(f"strength:{character['strength']}\n")
+        f.write(f"magic:{character['magic']}\n")
+        f.write(f"experience:{character['experience']}\n")
+        f.write(f"gold:{character['gold']}\n")
+        f.write(f"inventory:{','.join(character['inventory'])}\n")
+        f.write(f"active_quests:{','.join(character['active_quests'])}\n")
+        f.write(f"completed_quests:{','.join(character['completed_quests'])}\n")
+        f.write(f"equipped_weapon:{character.get('equipped_weapon')}\n")
+        f.write(f"equipped_armor:{character.get('equipped_armor')}\n")
 
 def load_character(character_name, save_directory="data/save_games"):
     """
@@ -142,51 +145,27 @@ def load_character(character_name, save_directory="data/save_games"):
     # Try to read file → SaveFileCorruptedError
     # Validate data format → InvalidSaveDataError
     # Parse comma-separated lists back into Python lists
-    filename = save_directory + character_name + "_save.txt"
+    filename = f"{character_name}_save.txt"
+    filepath = os.path.join(save_directory, filename)
 
-    if not os.path.exists(filename):
-        raise CharacterNotFoundError(f"Character '{character_name}' not found.")
+    if not os.path.exists(filepath):
+        raise CharacterNotFoundError(f"No save found for character '{character_name}'")
 
-    try:
-        with open(filename, "r") as file:
-            character = {}
-            for line in file:
-                if ":" not in line:
-                    continue
-                key, value = line.strip().split(":", 1)
-                key = key.lower()
-                value = value.strip()
-
-                
-                if key in ["level", "health", "max_health", "strength", "magic", "experience", "gold"]:
-                    try:
-                        character[key] = int(value)
-                    except ValueError:
-                        raise InvalidSaveDataError(f"Invalid number for {key}")
-                
-              
-                elif key in ["inventory", "active_quests", "completed_quests"]:
-                    if value:
-                        character[key] = [item.strip() for item in value.split(",")]
-                    else:
-                        character[key] = []
-                
-              
+    character = {}
+    with open(filepath, "r") as f:
+        for line in f:
+            key, value = line.strip().split(":", 1)
+            if key in ["inventory", "active_quests", "completed_quests"]:
+                if value:
+                    character[key] = value.split(",")
                 else:
-                    character[key] = value
-    except Exception:
-        raise SaveFileCorruptedError(f"Failed to read save file for '{character_name}'.")
-
- 
-    required_keys = ["name", "class", "level", "health", "max_health", 
-                     "strength", "magic", "experience", "gold",
-                     "inventory", "active_quests", "completed_quests"]
-    for key in required_keys:
-        if key not in character:
-            raise InvalidSaveDataError(f"Missing required field: {key}")
+                    character[key] = []
+            elif key in ["level", "health", "max_health", "strength", "magic", "experience", "gold"]:
+                character[key] = int(value)
+            else:
+                character[key] = value
 
     return character
-
 def list_saved_characters(save_directory="data/save_games"):
     """
     Get list of all saved character names
@@ -196,16 +175,15 @@ def list_saved_characters(save_directory="data/save_games"):
     # TODO: Implement this function
     # Return empty list if directory doesn't exist
     # Extract character names from filenames
-    saved = []
     if not os.path.exists(SAVE_DIR):
-        return saved
+        return []
 
     files = os.listdir(SAVE_DIR)
+    saved_characters = []
     for file in files:
-        if "_save.txt" in file:
-            name = file.replace("_save.txt", "")
-            saved.append(name)
-    return saved
+        if file.endswith("_save.txt"):
+            saved_characters.append(file.replace("_save.txt", ""))
+    return saved_characters
 
 def delete_character(character_name, save_directory="data/save_games"):
     """
@@ -216,12 +194,13 @@ def delete_character(character_name, save_directory="data/save_games"):
     """
     # TODO: Implement character deletion
     # Verify file exists before attempting deletion
-    filename = os.path.join(SAVE_DIR, f"{character_name}_save.txt")
-    if not os.path.exists(filename):
-        raise CharacterNotFoundError(f"Character '{character_name}' not found.")
-    os.remove(filename)
-    return True
+    filename = f"{character_name}_save.txt"
+    filepath = os.path.join(SAVE_DIR, filename)
 
+    if not os.path.exists(filepath):
+        raise CharacterNotFoundError(f"No save found for character '{character_name}'")
+
+    os.remove(filepath)
 
 # ============================================================================
 # CHARACTER OPERATIONS
