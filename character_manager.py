@@ -8,7 +8,7 @@ AI Usage: [Document any AI assistance used]
 
 This module handles character creation, loading, and saving.
 """
-
+SAVE_DIR = "data/save_games"
 import os
 from custom_exceptions import (
     InvalidCharacterClassError,
@@ -60,19 +60,21 @@ def create_character(name, character_class):
     stats = base_stats[character_class]
 
     character = {
-        'name': name,
-        'class': character_class,
-        'level': 1,
-        'health': stats['health'],
-        'strength': stats['strength'],
-        'magic': stats['magic'],
-        'experience': 0,
-        'gold': 100,
-        'inventory': [],
-        'active_quests': [],
-        'completed_quests': []
+        "name": name,
+        "class": character_class,
+        "level": 1,
+        "health": stats["health"],
+        "max_health": stats["health"],
+        "strength": stats["strength"],
+        "magic": stats["magic"],
+        "experience": 0,
+        "gold": 100,
+        "inventory": [],
+        "active_quests": [],
+        "completed_quests": [],
+        "equipped_weapon": None,
+        "equipped_armor": None
     }
-
     return character
 
 def save_character(character, save_directory="data/save_games"):
