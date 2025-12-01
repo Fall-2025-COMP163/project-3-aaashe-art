@@ -47,7 +47,33 @@ def create_character(name, character_class):
     # - inventory=[], active_quests=[], completed_quests=[]
     
     # Raise InvalidCharacterClassError if class not in valid list
-    pass
+    base_stats = {
+        'Warrior': {'health': 120, 'strength': 15, 'magic': 5},
+        'Mage': {'health': 80, 'strength': 8, 'magic': 20},
+        'Rogue': {'health': 90, 'strength': 12, 'magic': 10},
+        'Cleric': {'health': 100, 'strength': 10, 'magic': 15}
+    }
+
+    if character_class not in base_stats:
+        raise InvalidCharacterClassError(f"Invalid class: {character_class}")
+
+    stats = base_stats[character_class]
+
+    character = {
+        'name': name,
+        'class': character_class,
+        'level': 1,
+        'health': stats['health'],
+        'strength': stats['strength'],
+        'magic': stats['magic'],
+        'experience': 0,
+        'gold': 100,
+        'inventory': [],
+        'active_quests': [],
+        'completed_quests': []
+    }
+
+    return character
 
 def save_character(character, save_directory="data/save_games"):
     """
@@ -76,7 +102,24 @@ def save_character(character, save_directory="data/save_games"):
     # Create save_directory if it doesn't exist
     # Handle any file I/O errors appropriately
     # Lists should be saved as comma-separated values
-    pass
+    filename = f"{character['name']}_save.txt"
+
+    try:
+        with open(filename, "w") as f:
+            f.write(f"NAME:{character['name']}\n")
+            f.write(f"CLASS:{character['class']}\n")
+            f.write(f"LEVEL:{character['level']}\n")
+            f.write(f"HEALTH:{character['health']}\n")
+            f.write(f"STRENGTH:{character['strength']}\n")
+            f.write(f"MAGIC:{character['magic']}\n")
+            f.write(f"EXPERIENCE:{character['experience']}\n")
+            f.write(f"GOLD:{character['gold']}\n")
+            f.write(f"INVENTORY:{','.join(character['inventory'])}\n")
+            f.write(f"ACTIVE_QUESTS:{','.join(character['active_quests'])}\n")
+            f.write(f"COMPLETED_QUESTS:{','.join(character['completed_quests'])}\n")
+        return True
+    except Exception as e:
+        raise InvalidSaveDataError(f"Failed to save character: {e}")
 
 def load_character(character_name, save_directory="data/save_games"):
     """
@@ -97,7 +140,50 @@ def load_character(character_name, save_directory="data/save_games"):
     # Try to read file → SaveFileCorruptedError
     # Validate data format → InvalidSaveDataError
     # Parse comma-separated lists back into Python lists
-    pass
+    filename = save_directory + character_name + "_save.txt"
+
+    if not os.path.exists(filename):
+        raise CharacterNotFoundError(f"Character '{character_name}' not found.")
+
+    try:
+        with open(filename, "r") as file:
+            character = {}
+            for line in file:
+                if ":" not in line:
+                    continue
+                key, value = line.strip().split(":", 1)
+                key = key.lower()
+                value = value.strip()
+
+                
+                if key in ["level", "health", "max_health", "strength", "magic", "experience", "gold"]:
+                    try:
+                        character[key] = int(value)
+                    except ValueError:
+                        raise InvalidSaveDataError(f"Invalid number for {key}")
+                
+              
+                elif key in ["inventory", "active_quests", "completed_quests"]:
+                    if value:
+                        character[key] = [item.strip() for item in value.split(",")]
+                    else:
+                        character[key] = []
+                
+              
+                else:
+                    character[key] = value
+    except Exception:
+        raise SaveFileCorruptedError(f"Failed to read save file for '{character_name}'.")
+
+ 
+    required_keys = ["name", "class", "level", "health", "max_health", 
+                     "strength", "magic", "experience", "gold",
+                     "inventory", "active_quests", "completed_quests"]
+    for key in required_keys:
+        if key not in character:
+            raise InvalidSaveDataError(f"Missing required field: {key}")
+
+    return character
 
 def list_saved_characters(save_directory="data/save_games"):
     """
