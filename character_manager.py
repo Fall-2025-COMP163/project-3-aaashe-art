@@ -104,11 +104,11 @@ def save_character(character, save_directory="data/save_games"):
     # Create save_directory if it doesn't exist
     # Handle any file I/O errors appropriately
     # Lists should be saved as comma-separated values
-    if not os.path.exists(save_directory):
-        os.makedirs(save_directory)
+    if not os.path.exists(SAVE_DIR):
+        os.makedirs(SAVE_DIR)
 
     filename = f"{character['name']}_save.txt"
-    filepath = os.path.join(save_directory, filename)
+    filepath = os.path.join(SAVE_DIR, filename)
 
     with open(filepath, "w") as f:
         f.write(f"name:{character['name']}\n")
@@ -125,8 +125,6 @@ def save_character(character, save_directory="data/save_games"):
         f.write(f"completed_quests:{','.join(character['completed_quests'])}\n")
         f.write(f"equipped_weapon:{character.get('equipped_weapon')}\n")
         f.write(f"equipped_armor:{character.get('equipped_armor')}\n")
-
-    return True
 
 def load_character(character_name, save_directory="data/save_games"):
     """
@@ -147,32 +145,24 @@ def load_character(character_name, save_directory="data/save_games"):
     # Try to read file → SaveFileCorruptedError
     # Validate data format → InvalidSaveDataError
     # Parse comma-separated lists back into Python lists
-    filename = f"{name}_save.txt"
+    filename = f"{character_name}_save.txt"
     filepath = os.path.join(save_directory, filename)
 
     if not os.path.exists(filepath):
-        raise CharacterNotFoundError(f"No save found for character '{name}'")
+        raise CharacterNotFoundError(f"No save found for character '{character_name}'")
 
     character = {}
-
     with open(filepath, "r") as f:
         for line in f:
             key, value = line.strip().split(":", 1)
-
-            # Convert list-like fields
             if key in ["inventory", "active_quests", "completed_quests"]:
-                character[key] = value.split(",") if value else []
-
-            # Convert numeric fields
+                if value:
+                    character[key] = value.split(",")
+                else:
+                    character[key] = []
             elif key in ["level", "health", "max_health", "strength", "magic", "experience", "gold"]:
                 character[key] = int(value)
-
-            # Convert equipped items (None = no equipment)
-            elif key in ["equipped_weapon", "equipped_armor"]:
-                character[key] = None if value == "None" else value
-
             else:
-                # name, class, etc.
                 character[key] = value
 
     return character
@@ -185,16 +175,15 @@ def list_saved_characters(save_directory="data/save_games"):
     # TODO: Implement this function
     # Return empty list if directory doesn't exist
     # Extract character names from filenames
-    def list_saved_characters(save_directory="data/save_games"):
-    if not os.path.exists(save_directory):
+    if not os.path.exists(SAVE_DIR):
         return []
 
-    files = os.listdir(save_directory)
-    return [
-        f.replace("_save.txt", "")
-        for f in files
-        if f.endswith("_save.txt")
-    ]
+    files = os.listdir(SAVE_DIR)
+    saved_characters = []
+    for file in files:
+        if file.endswith("_save.txt"):
+            saved_characters.append(file.replace("_save.txt", ""))
+    return saved_characters
 
 def delete_character(character_name, save_directory="data/save_games"):
     """
@@ -205,15 +194,13 @@ def delete_character(character_name, save_directory="data/save_games"):
     """
     # TODO: Implement character deletion
     # Verify file exists before attempting deletion
-    def delete_character(character_name, save_directory="data/save_games"):
     filename = f"{character_name}_save.txt"
-    filepath = os.path.join(save_directory, filename)
+    filepath = os.path.join(SAVE_DIR, filename)
 
     if not os.path.exists(filepath):
         raise CharacterNotFoundError(f"No save found for character '{character_name}'")
 
     os.remove(filepath)
-    return True
 
 # ============================================================================
 # CHARACTER OPERATIONS
@@ -333,11 +320,9 @@ def validate_character_data(character):
     # Check all required keys exist
     # Check that numeric values are numbers
     # Check that lists are actually lists
-    required_keys = [
-    "name","class","level","health","max_health","strength","magic",
-    "experience","gold","inventory","active_quests","completed_quests",
-    "equipped_weapon","equipped_armor"
-]
+    required_keys = ["name", "class", "level", "health", "max_health",
+                     "strength", "magic", "experience", "gold",
+                     "inventory", "active_quests", "completed_quests"]
 
     for rk in required_keys:
         if rk not in character:
