@@ -2,9 +2,10 @@
 COMP 163 - Project 3: Quest Chronicles
 Character Manager Module - Starter Code
 
-Name: [Your Name Here]
+Name: Abraheem Ashe
 
-AI Usage: [Document any AI assistance used]
+AI Usage: Chat gpt was used on save/load/del character functions. Had lots of trouble making sure the file pathway was correct and constantly keep getting failing
+test cases and could not figure out why.
 
 This module handles character creation, loading, and saving.
 """

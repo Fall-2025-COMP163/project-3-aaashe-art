@@ -4,7 +4,7 @@ Main Game Module - Starter Code
 
 Name: Abraheem Ashe
 
-AI Usage: [Document any AI assistance used]
+AI Usage: Chat got was used periodically for logic errors and tips on how to write some lines of code simpiler
 
 This is the main game file that ties all modules together.
 Demonstrates module integration and complete game flow.

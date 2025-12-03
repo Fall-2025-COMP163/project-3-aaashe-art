@@ -2,9 +2,9 @@
 COMP 163 - Project 3: Quest Chronicles
 Combat System Module - Starter Code
 
-Name: [Your Name Here]
+Name: Abraheem Ash
 
-AI Usage: [Document any AI assistance used]
+AI Usage: Chat gpt was used periodically for logic erros and for tips on simpiler ways to write some lines.
 
 Handles combat mechanics
 """

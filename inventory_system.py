@@ -2,9 +2,9 @@
 COMP 163 - Project 3: Quest Chronicles
 Inventory System Module - Starter Code
 
-Name: [Your Name Here]
+Name: Abraheem ashe
 
-AI Usage: [Document any AI assistance used]
+AI Usage: Chat got was used periodically for logic errors and tips on how to write some lines of code simpiler
 
 This module handles inventory management, item usage, and equipment.
 """
