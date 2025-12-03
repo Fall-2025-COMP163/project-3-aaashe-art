@@ -126,7 +126,7 @@ def save_character(character, save_directory="data/save_games"):
         f.write(f"equipped_weapon:{character.get('equipped_weapon')}\n")
         f.write(f"equipped_armor:{character.get('equipped_armor')}\n")
 
-        return true
+        return True
 
 def load_character(character_name, save_directory="data/save_games"):
     """
