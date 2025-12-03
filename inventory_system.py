@@ -229,6 +229,7 @@ def equip_weapon(character, item_id, item_data):
         raise InvalidItemTypeError(f"Item '{item_id}' is not a weapon.")
 
     # Ensure equipped keys exist
+    current_weapon = None
     if "equipped_weapon" not in character:
         character["equipped_weapon"] = None
         current_weapon = character.get("equipped_weapon")
