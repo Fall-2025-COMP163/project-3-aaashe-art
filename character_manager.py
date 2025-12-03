@@ -17,7 +17,7 @@ from custom_exceptions import (
     InvalidSaveDataError,
     CharacterDeadError
 )
-SAVE_DIR = "saves"
+SAVE_DIR = "data/save_games"
 # ============================================================================
 # CHARACTER MANAGEMENT FUNCTIONS
 # ============================================================================
@@ -104,11 +104,11 @@ def save_character(character, save_directory="data/save_games"):
     # Create save_directory if it doesn't exist
     # Handle any file I/O errors appropriately
     # Lists should be saved as comma-separated values
-    if not os.path.exists(SAVE_DIR):
-        os.makedirs(SAVE_DIR)
+    if not os.path.exists(save_directory):
+        os.makedirs(save_directory)
 
     filename = f"{character['name']}_save.txt"
-    filepath = os.path.join(SAVE_DIR, filename)
+    filepath = os.path.join(save_directory, filename)
 
     with open(filepath, "w") as f:
         f.write(f"name:{character['name']}\n")
@@ -177,10 +177,10 @@ def list_saved_characters(save_directory="data/save_games"):
     # TODO: Implement this function
     # Return empty list if directory doesn't exist
     # Extract character names from filenames
-    if not os.path.exists(SAVE_DIR):
+    if not os.path.exists(save_directory):
         return []
 
-    files = os.listdir(SAVE_DIR)
+    files = os.listdir(save_directory)
     saved_characters = []
     for file in files:
         if file.endswith("_save.txt"):
@@ -196,13 +196,15 @@ def delete_character(character_name, save_directory="data/save_games"):
     """
     # TODO: Implement character deletion
     # Verify file exists before attempting deletion
+    
     filename = f"{character_name}_save.txt"
-    filepath = os.path.join(SAVE_DIR, filename)
+    filepath = os.path.join(save_directory, filename)
 
     if not os.path.exists(filepath):
         raise CharacterNotFoundError(f"No save found for character '{character_name}'")
 
     os.remove(filepath)
+    return True
 
 # ============================================================================
 # CHARACTER OPERATIONS
