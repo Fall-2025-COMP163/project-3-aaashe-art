@@ -80,12 +80,8 @@ def has_item(character, item_id):
     Returns: True if item in inventory, False otherwise
     """
     # TODO: Implement item check
-    inventory = character.get("inventory")
-    if inventory is None:
-        return False
-
-    if item_id in inventory:
-        return True
+    inventory = character.get("inventory", [])
+    return item_id in inventory
 
 
 def count_item(character, item_id):
@@ -222,33 +218,43 @@ def equip_weapon(character, item_id, item_data):
         character["inventory"] = []
         inventory = character["inventory"]
 
+    # Must have item
     if item_id not in inventory:
         raise ItemNotFoundError(f"Weapon '{item_id}' not in inventory.")
 
+    # Must be correct type
     if item_data.get("type") != "weapon":
         raise InvalidItemTypeError(f"Item '{item_id}' is not a weapon.")
 
-    # Ensure equipped keys exist
-    current_weapon = None
-    if "equipped_weapon" not in character:
-        character["equipped_weapon"] = None
-        current_weapon = character.get("equipped_weapon")
-    if current_weapon is not None:
-        space = get_inventory_space_remaining(character)
-        if space <= 0:
-            raise InventoryFullError("No inventory space to unequip current weapon.")
-        
-        character["equipped_weapon"] = None
-        inventory.append(current_weapon)
-        effect_string = item_data.get("effect", "")
-    stat_name, value = parse_item_effect(effect_string)
-    if stat_name == "strength":
-        character["strength"] = character.get("strength", 0) + value
-    else:
-        # weapons expected to apply strength; accept other stats but apply generically
-        character[stat_name] = character.get(stat_name, 0) + value
+    # Ensure equipped key exists
+    current_weapon = character.get("equipped_weapon")
 
+    # If a weapon is already equipped, unequip it properly
+    if current_weapon is not None:
+        # Get data for currently equipped weapon
+        prev_weapon_data = item_data.get("all_items", {}).get(current_weapon)
+        if prev_weapon_data:
+            prev_stat, prev_val = parse_item_effect(prev_weapon_data["effect"])
+            character[prev_stat] = character.get(prev_stat, 0) - prev_val
+
+        # Ensure space in inventory
+        if get_inventory_space_remaining(character) <= 0:
+            raise InventoryFullError("No inventory space to unequip current weapon.")
+
+        # Put the old weapon back
+        inventory.append(current_weapon)
+
+    # Equip the new weapon
+    effect_string = item_data.get("effect", "")
+    stat_name, value = parse_item_effect(effect_string)
+
+    # Apply new bonus
+    character[stat_name] = character.get(stat_name, 0) + value
+
+    # Save equipped weapon
     character["equipped_weapon"] = item_id
+
+    # Remove weapon from inventory
     inventory.remove(item_id)
 
     return f"Equipped {item_data.get('name', item_id)} (+{value} {stat_name})"
@@ -483,10 +489,10 @@ def apply_stat_effect(character, stat_name, value):
     # TODO: Implement stat application
     # Add value to character[stat_name]
     # If stat is health, ensure it doesn't exceed max_health
-    if stat_name in ["health", "max_health", "strength", "magic"]:
-        character[stat_name] += value
-        if stat_name == "health" and character["health"] > character["max_health"]:
-            character["health"] = character["max_health"]
+    character[stat_name] = character.get(stat_name, 0) + value
+
+    if stat_name == "health" and character["health"] > character.get("max_health", 0):
+        character["health"] = character["max_health"]
 
 def display_inventory(character, item_data_dict):
     """
@@ -521,6 +527,7 @@ def display_inventory(character, item_data_dict):
         name = item_info["name"]
         itype = item_info["type"]
         qty = counts[item_id]
+        
 
         print(f"{name} (id: {item_id}) | type: {itype} | qty: {qty}")
 
