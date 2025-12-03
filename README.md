@@ -1,3 +1,11 @@
+abraheem ashe 
+this is my project 3 code, it is played using just number inputs. You continue to explore facing different generated monster that you bsttle and level up. The higher the level the wider you enemy pool is and the stronger the enemy. Certain custom exceptions were raised for many different scenarios, for example they raise for insufficient gold, if something doesnt load correctly, if you inventory is full, if the action doesnt match the appropiate item, just to name a few. The organization of the files is default but it made sense to me that way when I started coding, it starts with initializing parts that I would end up using later on in different files, such as character manager is first but the things initialized in character manager connected when I started to work on main. Also with exceptions I tried to raise them when even the player tries to do something outside of the scope of the game. I did make any major changes to the default rules, but I would have liked to implemnt different variants of the mobs that the player would face in the exploration. The Ai used was chat gpt, it was usued periodicxally throught the code mainly just for logic error fixes or to double check certain function for any glaring errors that were missed by the ide, besides that chat gpt was not used to write any code, beside help writing for save/load character. Chat gpt was use pretty agressivly when try to fix my files issue. Even though I wasnt getting any errors on my ide the test cases where not passing because of the files not being correctly pathwayed. Even using AI did not help a lot because it was having a hard time unbderstnad the file pathway that was neededs. I used AI toi rewite my save.load characters but I was still getting errors until I figured out the my SAVE_DIR was initiallised with the wrong dir.
+
+
+
+
+
+
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/wnCpjX4n)
 [![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=21802861&assignment_repo_type=AssignmentRepo)
 # COMP 163: Project 3 - Quest Chronicles
